@@ -13,6 +13,7 @@ $cancel-button-color = tomato
 
         &.inactive input[type=submit],
         &.inactive .skip-duplicates
+        &.inactive #common-tags,
         &.uploading input[type=submit],
         &.uploading .skip-duplicates,
         &:not(.uploading) .cancel
@@ -25,6 +26,9 @@ $cancel-button-color = tomato
             padding: 2em
             small
                 font-size: 60%
+
+    label[for=common-tags]
+        display: none !important
 
     input[type=submit]
         margin-top: 1em
