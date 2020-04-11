@@ -1,5 +1,7 @@
 'use strict';
 
+import Tagify from '@yaireo/tagify'
+
 const events = require('../events.js');
 const settings = require('../models/settings.js');
 const keyboard = require('../util/keyboard.js');
@@ -158,6 +160,7 @@ class PostsHeaderView extends events.EventTarget {
 
         keyboard.bind('p', () => this._focusFirstPostNode());
         search.searchInputNodeFocusHelper(this._queryInputNode);
+        new Tagify(this._queryInputNode, { delimiters: " " });
 
         for (let safetyButtonNode of this._safetyButtonNodes) {
             safetyButtonNode.addEventListener(
