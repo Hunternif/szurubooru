@@ -177,11 +177,7 @@
         margin-bottom: 0.25em
         margin-right: 0.25em
     input[name=search-text]
-        width: 25em
-        @media (max-width: 1000px)
-            display: block
-            width: 100%
-            margin-bottom: 0.5em
+        display: none //superceded by Tagify input, but necessary for holding the query
     .append
         @media (max-width: 500px)
             margin-left: 0.8em
@@ -304,5 +300,9 @@
         width: auto
         margin-right: 0.25em
         margin-bottom: 0.25em
+        @media (max-width: 1000px)
+            display: flex
+            min-width: auto
+            width: 100%
         .tagify__input
             display: inline-block

@@ -150,7 +150,6 @@ class PostsHeaderView extends events.EventTarget {
         views.replaceContent(this._hostNode, template(ctx));
 
         // Set up Tagify input
-        this._queryInputNode.hidden = true;
         this._queryTermsControl = new QueryTermsControl(this._tagifyNode, ctx);
         this._queryTermsControl.addEventListener('change', e => this._evtTermsChange(e));
 
