@@ -1,7 +1,5 @@
 'use strict';
 
-import Tagify from '@yaireo/tagify'
-
 const events = require('../events.js');
 const settings = require('../models/settings.js');
 const keyboard = require('../util/keyboard.js');
@@ -11,6 +9,7 @@ const views = require('../util/views.js');
 const TagAutoCompleteControl =
     require('../controls/tag_auto_complete_control.js');
 const MetricHeaderControl = require('../controls/metric_header_control');
+const QueryTermsControl = require('../controls/query_terms_control');
 
 const template = views.getTemplate('posts-header');
 
@@ -150,8 +149,10 @@ class PostsHeaderView extends events.EventTarget {
         this._hostNode = ctx.hostNode;
         views.replaceContent(this._hostNode, template(ctx));
 
+        // Set up Tagify input
         this._queryInputNode.hidden = true;
-        this._tagify = new Tagify(this._tagifyNode, { delimiters: " " });
+        this._queryTermsControl = new QueryTermsControl(this._tagifyNode, ctx);
+        this._queryTermsControl.addEventListener('change', e => this._evtTermsChange(e));
 
         this._autoCompleteControl = new TagAutoCompleteControl(
             this._tagifyInputNode,
@@ -372,6 +373,11 @@ class PostsHeaderView extends events.EventTarget {
                             {}, this._ctx.parameters, {tag: null, offset: 0}),
                     },
                 }));
+    }
+
+    _evtTermsChange(e) {
+        this._queryInputNode.value = this._ctx.parameters.query;
+        this._navigate();
     }
 
     _evtFormSubmit(e) {
