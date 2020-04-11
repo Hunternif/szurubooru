@@ -136,9 +136,15 @@ function bundleCss() {
         gzipFile('./public/css/app.min.css');
     }
 
-    fs.copyFileSync(
+    let dependencies = [
         './node_modules/@fortawesome/fontawesome-free/css/all.min.css',
-        './public/css/vendor.min.css');
+        './node_modules/@yaireo/tagify/dist/tagify.css'
+    ];
+    let vendorCss = '';
+    for (const file of dependencies) {
+        vendorCss += readTextFile(file);
+    }
+    fs.writeFileSync('./public/css/vendor.min.css', vendorCss);
     if (process.argv.includes('--gzip')) {
         gzipFile('./public/css/vendor.min.css');
     }
