@@ -150,8 +150,11 @@ class PostsHeaderView extends events.EventTarget {
         this._hostNode = ctx.hostNode;
         views.replaceContent(this._hostNode, template(ctx));
 
+        this._queryInputNode.hidden = true;
+        this._tagify = new Tagify(this._tagifyNode, { delimiters: " " });
+
         this._autoCompleteControl = new TagAutoCompleteControl(
-            this._queryInputNode,
+            this._tagifyInputNode,
             {
                 confirm: tag =>
                     this._autoCompleteControl.replaceSelectedText(
@@ -159,8 +162,7 @@ class PostsHeaderView extends events.EventTarget {
             });
 
         keyboard.bind('p', () => this._focusFirstPostNode());
-        search.searchInputNodeFocusHelper(this._queryInputNode);
-        new Tagify(this._queryInputNode, { delimiters: " " });
+        search.searchInputNodeFocusHelper(this._tagifyInputNode);
 
         for (let safetyButtonNode of this._safetyButtonNodes) {
             safetyButtonNode.addEventListener(
@@ -239,6 +241,14 @@ class PostsHeaderView extends events.EventTarget {
 
     get _queryInputNode() {
         return this._hostNode.querySelector('form [name=search-text]');
+    }
+
+    get _tagifyNode() {
+        return this._hostNode.querySelector('form [name=tagify_placeholder]');
+    }
+
+    get _tagifyInputNode() {
+        return this._hostNode.querySelector('form .tagify__input');
     }
 
     get _randomizeButtonNode() {

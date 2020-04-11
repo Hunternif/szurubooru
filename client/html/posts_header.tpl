@@ -1,6 +1,7 @@
 <div class='post-list-header'><%
     %><form class='horizontal search'><%
         %><%= ctx.makeTextInput({text: 'Search query', id: 'search-text', name: 'search-text', value: ctx.parameters.query}) %><%
+        %><input name="tagify_placeholder"><%
         %><wbr/><%
         %><input class='mousetrap' type='submit' value='Search'/><%
         %><button id='randomize-button' class='icon-button'><%
