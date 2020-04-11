@@ -73,12 +73,14 @@ form .fa-question-circle-o
     padding: 1.5em
     text-align: center
     @media (max-width: 1000px)
-        padding: 1em
+        padding: 0
     >.content-wrapper
         box-sizing: border-box /* make max-width: 100% on this element include padding */
         text-align: left
         display: inline-block
         margin: 0 auto
+        @media (max-width: 1000px)
+            padding: 1em
         >*:first-child, form h1
             margin-top: 0
         nav.buttons
