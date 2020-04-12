@@ -15,12 +15,11 @@ class QueryTermsControl extends events.EventTarget {
 
         this._tagify = new Tagify(hostNode, {
             delimiters: " ",
+            mode: 'mix', // need this mode because it doesn't use 'Enter' or 'Tab' keys.
         });
         this._tagify.addTags(ctx.parameters.query, true);
         this._tagify.on('add', () => this._refreshQuery());
         this._tagify.on('remove', () => this._refreshQuery());
-
-        this._tagifyInputNode.addEventListener('keydown', e => this._overrideKeyDown(e))
 
         this._autoCompleteControl = new TagifyAutoCompleteControl(
             this._tagifyInputNode,
@@ -30,19 +29,6 @@ class QueryTermsControl extends events.EventTarget {
                     this._tagify.addTags(term, true);
                 }
             });
-    }
-
-    _overrideKeyDown(e) {
-        switch (e.key) {
-            case 'Enter':
-            case 'Tab':
-                if (this._autoCompleteControl.visible) {
-                    //Hack: prevent typing in Tagify when our custom auto-complete menu is shown
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                }
-        }
     }
 
     _refreshQuery() {
