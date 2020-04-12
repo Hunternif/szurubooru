@@ -364,7 +364,6 @@ class PostsHeaderView extends events.EventTarget {
 
     _evtTermsChange(e) {
         this._queryInputNode.value = this._ctx.parameters.query;
-        this._navigate();
     }
 
     _evtFormSubmit(e) {
