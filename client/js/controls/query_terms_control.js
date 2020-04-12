@@ -21,6 +21,7 @@ class QueryTermsControl extends events.EventTarget {
         this._tagify.addTags(ctx.parameters.query, true);
         this._tagify.on('add', () => this._refreshQuery());
         this._tagify.on('remove', () => this._refreshQuery());
+        this._tagify.on('keydown', e => this._overrideKeyDown(e));
 
         this._autoCompleteControl = new TagifyAutoCompleteControl(
             this._tagifyInputNode,
@@ -30,6 +31,14 @@ class QueryTermsControl extends events.EventTarget {
                     this._tagify.addTags(term, true);
                 }
             });
+    }
+
+    _overrideKeyDown(e) {
+        switch (e.detail.originalEvent.key) {
+            case 'Space':
+                let term = this._tagify.value;
+                this._tagify.addTags(term, true);
+        }
     }
 
     _refreshQuery() {
