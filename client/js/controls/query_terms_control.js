@@ -15,13 +15,12 @@ class QueryTermsControl extends events.EventTarget {
 
         this._tagify = new Tagify(hostNode, {
             delimiters: " ",
-            mode: 'mix', // need this mode because it doesn't use 'Enter' or 'Tab' keys.
-            pattern: "$$$$$$$", // fake pattern to prevent error
         });
         this._tagify.addTags(ctx.parameters.query, true);
         this._tagify.on('add', () => this._refreshQuery());
         this._tagify.on('remove', () => this._refreshQuery());
-        this._tagify.on('keydown', e => this._overrideKeyDown(e));
+        // hack to override 'Enter' and 'Tab' keys
+        this._tagify.events.callbacks.onKeydown = this._overrideKeyDown;
 
         this._autoCompleteControl = new TagifyAutoCompleteControl(
             this._tagifyInputNode,
@@ -33,14 +32,6 @@ class QueryTermsControl extends events.EventTarget {
             });
     }
 
-    _overrideKeyDown(e) {
-        switch (e.detail.originalEvent.key) {
-            case 'Space':
-                let term = this._tagify.value;
-                this._tagify.addTags(term, true);
-        }
-    }
-
     _refreshQuery() {
         this._ctx.parameters.query = this._tagify.value.map(term => term.value).join(' ');
         this._autoCompleteControl.hide();
@@ -49,6 +40,40 @@ class QueryTermsControl extends events.EventTarget {
 
     get _tagifyInputNode() {
         return this._tagify.DOM.input;
+    }
+
+    _overrideKeyDown(e){
+        const s = e.target.textContent.trim();
+
+        this.trigger("keydown", {originalEvent: this._tagify.cloneEvent(e)});
+
+        // ignore 'mix' mode
+
+        switch( e.key ){
+            case 'Backspace' :
+                if( s === "" || s.charCodeAt(0) === 8203 ){  // 8203: ZERO WIDTH SPACE unicode
+                    // timeout reason: when edited tag gets focused and the caret is placed at the end,
+                    // the last character gets deleted (because of backspace)
+                    setTimeout(this._tagify.editTag.bind(this), 0)
+                }
+                break;
+
+            case 'Esc' :
+            case 'Escape' :
+                e.target.blur();
+                break;
+
+            case 'Space' :
+                e.preventDefault(); // solves Chrome bug - http://stackoverflow.com/a/20398191/104380
+                // because the main "keydown" event is bound before the dropdown events, this will fire first and will not *yet*
+                // know if an option was just selected from the dropdown menu. If an option was selected,
+                // the dropdown events should handle adding the tag
+                setTimeout(()=>{
+                    if( this._autoCompleteControl.visible )
+                        return
+                    this._tagify.addTags(s, true)
+                })
+        }
     }
 }
 
