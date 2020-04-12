@@ -16,6 +16,7 @@ class QueryTermsControl extends events.EventTarget {
         this._tagify = new Tagify(hostNode, {
             delimiters: " ",
             mode: 'mix', // need this mode because it doesn't use 'Enter' or 'Tab' keys.
+            pattern: "$$$$$$$", // fake pattern to prevent error
         });
         this._tagify.addTags(ctx.parameters.query, true);
         this._tagify.on('add', () => this._refreshQuery());

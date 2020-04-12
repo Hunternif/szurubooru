@@ -12,10 +12,6 @@ class TagifyAutoCompleteControl extends TagAutoCompleteControl {
 
         super(input, options);
     }
-
-    replaceSelectedText(result, addSpace) {
-        this._sourceInputNode.innerHTML = result;
-    }
 }
 
 module.exports = TagifyAutoCompleteControl;
