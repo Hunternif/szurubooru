@@ -153,14 +153,6 @@ class PostsHeaderView extends events.EventTarget {
         this._queryTermsControl = new QueryTermsControl(this._tagifyNode, ctx);
         this._queryTermsControl.addEventListener('change', e => this._evtTermsChange(e));
 
-        this._autoCompleteControl = new TagAutoCompleteControl(
-            this._tagifyInputNode,
-            {
-                confirm: tag =>
-                    this._autoCompleteControl.replaceSelectedText(
-                        misc.escapeSearchTerm(tag.names[0]), true),
-            });
-
         keyboard.bind('p', () => this._focusFirstPostNode());
         search.searchInputNodeFocusHelper(this._tagifyInputNode);
 
@@ -245,10 +237,6 @@ class PostsHeaderView extends events.EventTarget {
 
     get _tagifyNode() {
         return this._hostNode.querySelector('form [name=tagify_placeholder]');
-    }
-
-    get _tagifyInputNode() {
-        return this._hostNode.querySelector('form .tagify__input');
     }
 
     get _randomizeButtonNode() {
@@ -396,7 +384,6 @@ class PostsHeaderView extends events.EventTarget {
     }
 
     _navigate() {
-        this._autoCompleteControl.hide();
         let parameters = {
             query: this._queryInputNode.value,
             cachenumber: this._ctx.parameters.cachenumber,

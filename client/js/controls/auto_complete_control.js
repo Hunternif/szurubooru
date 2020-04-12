@@ -296,6 +296,10 @@ class AutoCompleteControl {
             activeItem.classList.add('active');
         }
     }
+
+    get visible() {
+        return this._isVisible;
+    }
 };
 
 module.exports = AutoCompleteControl;
