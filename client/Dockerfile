@@ -2,7 +2,6 @@ FROM node:lts as builder
 WORKDIR /opt/app
 
 COPY package.json package-lock.json ./
-RUN npm install -g npm@lts
 RUN npm install
 
 COPY . ./
