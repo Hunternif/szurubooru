@@ -28,6 +28,11 @@ class EndlessPageView {
         this._runningRequests = 0;
         this._initialPageLoad = true;
 
+        // When navigating back to list of posts, try to restore the scroll Y position
+        this._shouldRestoreScrollY = false;
+        this._initialPageTopY = 0;
+        this._topPageNode = null;
+
         this.clearMessages();
         views.emptyContent(this._pagesHolderNode);
 
@@ -101,10 +106,16 @@ class EndlessPageView {
                     topOffset,
                     topLimit === ctx.defaultLimit ? null : topLimit
                 ),
-                ctx.state,
+                // ctx here is not "real" context, it's the object from _syncPageController()
+                ctx.browserState,
                 false
             );
             this.currentOffset = topOffset;
+        }
+        // also sync the current scroll position of the top page
+        if (!this._shouldRestoreScrollY) {
+            this._topPageNode = topPageNode;
+            ctx.browserState.topPageTopY = topPageNode.getBoundingClientRect().top;
         }
     }
 
@@ -203,16 +214,25 @@ class EndlessPageView {
 
             if (append) {
                 this._pagesHolderNode.appendChild(pageNode);
-                if (this._initialPageLoad && response.offset > 0) {
-                    window.scroll(0, pageNode.getBoundingClientRect().top);
+                if (this._initialPageLoad && ctx.browserState.topPageTopY !== undefined) {
+                    // This is the top page. We know which Y scroll position it should be in
+                    // from the previous browser state:
+                    this._initialPageTopY = ctx.browserState.topPageTopY;
+                    this._shouldRestoreScrollY = true;
+                    this._topPageNode = pageNode;
                 }
             } else {
                 this._pagesHolderNode.prependChild(pageNode);
-
-                window.scroll(
-                    window.scrollX,
-                    window.scrollY + pageNode.offsetHeight
-                );
+                window.scroll(0, window.scrollY + pageNode.offsetHeight);
+            }
+            // Sometimes we can't scroll the page because neighboring pages haven't loaded,
+            // so there is no content. So we Try scrolling as new pages load until we are
+            // able to scroll close enough, e.g. within 10 pixels:
+            if (this._shouldRestoreScrollY) {
+                window.scroll(0, this._topPageNode.getBoundingClientRect().top - this._initialPageTopY);
+                if (Math.abs(this._topPageNode.getBoundingClientRect().top - this._initialPageTopY) < 10) {
+                    this._shouldRestoreScrollY = false;
+                }
             }
         } else if (!response.results.length) {
             this.showInfo("No data to show");

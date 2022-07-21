@@ -146,6 +146,7 @@ class PostListController {
     _syncPageController() {
         this._pageController.run({
             parameters: this._ctx.parameters,
+            browserState: this._ctx.state,
             defaultLimit: parseInt(settings.get().postsPerPage),
             getClientUrlForPage: (offset, limit) => {
                 const parameters = Object.assign({}, this._ctx.parameters, {
