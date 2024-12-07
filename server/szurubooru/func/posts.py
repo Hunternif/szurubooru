@@ -1,5 +1,6 @@
 import hmac
 import logging
+import re
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -22,6 +23,7 @@ from szurubooru.func import (
     util,
 )
 from szurubooru.func.image_hash import NpMatrix
+from szurubooru.search import parser, criteria
 
 logger = logging.getLogger(__name__)
 
@@ -962,6 +964,7 @@ def search_by_signature(
     signature: NpMatrix,
     limit: int = 100,
     distance_cutoff: float = image_hash.DISTANCE_CUTOFF,
+    query_text: str = ''
 ) -> List[Tuple[float, model.Post]]:
     query_words = image_hash.generate_words(signature)
     """
@@ -972,15 +975,33 @@ def search_by_signature(
     https://www.postgresql.org/docs/9.2/functions-array.html
     """
 
-    dbquery = """
-    SELECT s.post_id, s.signature, count(a.query) AS score
-    FROM post_signature AS s, unnest(s.words, :q) AS a(word, query)
-    WHERE a.word = a.query
-    GROUP BY s.post_id
-    ORDER BY score DESC LIMIT :limit;
-    """
+    # optimization: don't join if safety is not queried:
+    if len(query_text) > 0:
+        dbquery = """
+        SELECT s.post_id, s.signature, count(a.query) AS score
+        FROM post_signature AS s
+        CROSS JOIN unnest(s.words, :q) AS a(word, query)
+        INNER JOIN post ON post.id = s.post_id
+        WHERE a.word = a.query
+        AND post.safety in :safety
+        GROUP BY s.post_id
+        ORDER BY score DESC LIMIT :limit;
+        """
+    else:
+        dbquery = """
+        SELECT s.post_id, s.signature, count(a.query) AS score
+        FROM post_signature AS s, unnest(s.words, :q) AS a(word, query)
+        WHERE a.word = a.query
+        GROUP BY s.post_id
+        ORDER BY score DESC LIMIT :limit;
+        """
+    allowed_rating = _get_safety_list(query_text)
 
-    candidates = db.session.execute(dbquery, {"q": query_words, "limit": limit})
+    candidates = db.session.execute(dbquery, {
+        "q": query_words,
+        "limit": limit,
+        "safety": tuple(allowed_rating),
+    })
     data = tuple(
         zip(
             *[
@@ -1001,3 +1022,41 @@ def search_by_signature(
         ]
     else:
         return []
+
+
+def _get_safety_list(query_text: str = '') -> List[str]:
+    """Will output a list of safety options matched by the query"""
+    # TODO(hunternif): searching by signature should be done in executor,
+    # together with all other tokens, but as a quick fix for safety rating,
+    # we can parse it here.
+    # Assuming format: -rating:safe,sketchy,unsafe
+    query_parser = parser.Parser()
+    search_query = query_parser.parse(query_text)
+    safety_map = util.flip(SAFETY_MAP)
+    allowed = []
+    disallowed = []
+
+    def process_safety(safety_value: str):
+        safety = safety_map.get(safety_value, None)
+        if safety:
+            if token.negated:
+                disallowed.append(safety)
+            else:
+                allowed.append(safety)
+
+    for token in search_query.named_tokens:
+        if token.name == "rating":
+            criterion = token.criterion
+            if isinstance(criterion, criteria.PlainCriterion):
+                process_safety(criterion.value)
+            elif isinstance(criterion, criteria.ArrayCriterion):
+                for value in criterion.values:
+                    process_safety(value)
+
+    if len(allowed) == 0:
+        allowed = [
+            model.Post.SAFETY_SAFE,
+            model.Post.SAFETY_SKETCHY,
+            model.Post.SAFETY_UNSAFE,
+        ]
+    return [x for x in allowed if x not in disallowed]

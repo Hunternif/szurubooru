@@ -328,6 +328,7 @@ def get_posts_lookalikes(
     auth.verify_privilege(ctx.user, "posts:reverse_search")
     limit = ctx.get_param_as_int("limit", default=10, min=1, max=100)
     threshold = ctx.get_param_as_float("threshold", default=1, min=0, max=100)
+    query_text = ctx.get_param_as_string("query", default="")
     post_id = _get_post_id(params)
     post = posts.get_post_by_id(post_id)
     if post.signature is None:
@@ -335,7 +336,7 @@ def get_posts_lookalikes(
 
     sig = image_hash.unpack_signature(post.signature.signature)
     # limit + 1 because the original post will be excluded
-    lookalikes = posts.search_by_signature(sig, limit + 1, threshold)
+    lookalikes = posts.search_by_signature(sig, limit + 1, threshold, query_text)
     # exclude the original post:
     lookalikes = filter(lambda la: la[1].post_id != post_id, lookalikes)
     lookalikes = sorted(lookalikes, key=lambda la: la[0])

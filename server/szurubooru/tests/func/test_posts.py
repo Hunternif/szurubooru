@@ -8,13 +8,13 @@ from szurubooru import db, model
 from szurubooru.func import (
     comments,
     files,
-    image_hash,
     images,
     posts,
     tags,
     users,
     util,
 )
+from szurubooru.func.posts import _get_safety_list
 
 
 @pytest.mark.parametrize(
@@ -1253,3 +1253,12 @@ def test_search_by_image(post_factory, config_injector, read_asset):
 
     result2 = posts.search_by_image(read_asset("png.png"))
     assert not result2
+
+
+def test_get_safety_list():
+    assert _get_safety_list('') == ['safe', 'sketchy', 'unsafe']
+    assert _get_safety_list('abc') == ['safe', 'sketchy', 'unsafe']
+    assert _get_safety_list('abc rating:lol -def') ==\
+           ['safe', 'sketchy', 'unsafe']
+    assert _get_safety_list('abc -rating:sketchy,lol def') == ['safe', 'unsafe']
+    assert _get_safety_list('rating:safe,unsafe -rating:safe') == ['unsafe']

@@ -58,6 +58,7 @@ class PostList extends AbstractList {
         return api
             .get(
                 uri.formatApiLink("post", id, "reverse-search", {
+                    query: PostList.decorateSearchQuery(""), 
                     limit: limit,
                     threshold: threshold,
                     fields: fields.join(","),
