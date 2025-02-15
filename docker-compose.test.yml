@@ -1,0 +1,23 @@
+services:
+  test-server:
+    build:
+      context: ./server
+      target: testing
+    environment:
+      POSTGRES_HOST: test-sql
+      POSTGRES_USER: your_postgres_user
+      POSTGRES_PASSWORD: your_postgres_password
+    depends_on:
+      - test-sql
+    volumes:
+      - "${MOUNT_DATA}:/data"
+      - "./server/config.yaml:/opt/app/config.yaml"
+
+  test-sql:
+    image: postgres:11-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: your_postgres_user
+      POSTGRES_PASSWORD: your_postgres_password
+    volumes:
+      - "${MOUNT_SQL}:/var/lib/postgresql/data"
