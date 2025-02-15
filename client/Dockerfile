@@ -11,9 +11,13 @@ ARG CLIENT_BUILD_ARGS="--debug"
 RUN BASE_URL="__BASEURL__" node build.js --gzip ${CLIENT_BUILD_ARGS}
 
 
-FROM --platform=$BUILDPLATFORM scratch as approot
+FROM --platform=$BUILDPLATFORM nginx:alpine as approot
 
+# Copy and fix script
 COPY docker-start.sh /
+RUN apk add --no-cache dos2unix && \
+    dos2unix /docker-start.sh && \
+    chmod +x /docker-start.sh
 
 WORKDIR /etc/nginx
 COPY nginx.conf.docker ./nginx.conf
