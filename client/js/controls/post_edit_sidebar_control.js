@@ -221,9 +221,8 @@ class PostEditSidebarControl extends events.EventTarget {
         );
 
         if (this._formNode) {
-            const inputNodes = this._formNode.querySelectorAll(
-                "input, textarea"
-            );
+            const inputNodes =
+                this._formNode.querySelectorAll("input, textarea");
             for (let node of inputNodes) {
                 node.addEventListener("change", (e) =>
                     this.dispatchEvent(new CustomEvent("change"))
@@ -476,7 +475,7 @@ class PostEditSidebarControl extends events.EventTarget {
                         : undefined,
 
                     thumbnail:
-                        this._newPostThumbnail !== undefined
+                        this._newPostThumbnail !== undefined && this._newPostThumbnail !== null
                             ? this._newPostThumbnail
                             : undefined,
 

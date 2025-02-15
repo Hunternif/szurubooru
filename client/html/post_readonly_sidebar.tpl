@@ -15,9 +15,10 @@
                     'image/heic': 'HEIC',
                     'video/webm': 'WEBM',
                     'video/mp4': 'MPEG-4',
+                    'video/quicktime': 'MOV',
                     'application/x-shockwave-flash': 'SWF',
-                }[ctx.post.mimeType] %>
-            </a>
+                }[ctx.post.mimeType] %><!--
+            --></a>
             (<%- ctx.post.canvasWidth %>x<%- ctx.post.canvasHeight %>)
             <% if (ctx.post.flags.length) { %><!--
                 --><% if (ctx.post.flags.includes('loop')) { %><i class='fa fa-redo-alt'></i><% } %><!--
@@ -57,7 +58,7 @@
             Search on
             <a target="_blank" href='http://iqdb.org/?url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>IQDB</a> &middot;
             <a target="_blank" href='https://danbooru.donmai.us/posts?tags=md5:<%- ctx.post.checksumMD5 %>'>Danbooru</a> &middot;
-            <a target="_blank" href='https://www.google.com/searchbyimage?&image_url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
+            <a target="_blank" href='https://lens.google.com/uploadbyurl?url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
         </section>
 
         <section class='social'>
@@ -111,10 +112,10 @@
                         --><% if (ctx.canListPosts) { %><!--
                             --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
                         --><% } %><!--
-                            --><%- ctx.getPrettyName(tag.names[0]) %>&#32;<!--
+                            --><%- ctx.getPrettyName(tag.names[0]) %><!--
                         --><% if (ctx.canListPosts) { %><!--
                             --></a><!--
-                        --><% } %><!--
+                        --><% } %>&#32;<!--
                         --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
                     --></li><!--
                 --><% } %><!--

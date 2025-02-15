@@ -47,6 +47,13 @@ class PostsPageView extends events.EventTarget {
                     );
                 }
             }
+
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                deleteFlipperNode.addEventListener("click", (e) =>
+                    this._evtBulkToggleDeleteClick(e, post)
+                );
+            }
         }
 
         this._syncBulkEditorsHighlights();
@@ -66,6 +73,10 @@ class PostsPageView extends events.EventTarget {
 
     _getRelationFlipperNode(listItemNode) {
         return listItemNode.querySelector(".relation-flipper");
+    }
+
+    _getDeleteFlipperNode(listItemNode) {
+        return listItemNode.querySelector(".delete-flipper");
     }
 
     _evtPostChange(e) {
@@ -128,6 +139,20 @@ class PostsPageView extends events.EventTarget {
         );
     }
 
+    _evtBulkToggleDeleteClick(e, post) {
+        e.preventDefault();
+        const linkNode = e.target;
+        linkNode.classList.toggle("delete");
+        this.dispatchEvent(
+            new CustomEvent("markForDeletion", {
+                detail: {
+                    post,
+                    delete: linkNode.classList.contains("delete"),
+                },
+            })
+        );
+    }
+
     _syncBulkEditorsHighlights() {
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
@@ -158,6 +183,16 @@ class PostsPageView extends events.EventTarget {
             if (relationFlipperNode) {
                 let related = this._ctx.parameters.relations.includes(post.id);
                 relationFlipperNode.classList.toggle("related", related);
+            }
+            
+            const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
+            if (deleteFlipperNode) {
+                deleteFlipperNode.classList.toggle(
+                    "delete",
+                    this._ctx.bulkEdit.markedForDeletion.some(
+                        (x) => x.id == postId
+                    )
+                );
             }
         }
     }

@@ -15,7 +15,7 @@
             border: 0
             outline: 0
 
-        nav.buttons
+        >.sidebar>nav.buttons, >.content nav.buttons
             margin-top: 0
             display: flex
             flex-wrap: wrap
@@ -53,8 +53,11 @@
         .post-content
             margin: 0
 
+    .after-mobile-controls
+        width: 100%
+
 .darktheme .post-view
-    >.sidebar
+    >.sidebar, >.content
         nav.buttons
             article
                 a:not(.inactive):hover
@@ -64,6 +67,8 @@
 @media (max-width: 800px)
     .post-view
         flex-wrap: wrap
+        >.after-mobile-controls
+            order: 3
         >.sidebar
             order: 2
             min-width: 100%
@@ -127,7 +132,6 @@
         h1
             margin-bottom: 0.5em
         .thumbnail
-            background-position: 50% 30%
             width: 4em
             height: 3em
         li

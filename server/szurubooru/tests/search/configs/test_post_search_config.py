@@ -1003,7 +1003,6 @@ def test_filter_by_similar(
     verify_unpaged(input, expected_post_ids, True)
 
 
-
 @pytest.mark.parametrize("input,expected_post_ids", [
     ("similar:1", [3, 1, 2]),
     ("similar:2", [3, 2, 1]),
@@ -1023,3 +1022,55 @@ def test_sort_by_similar(
     )
     db.session.flush()
     verify_unpaged(input, expected_post_ids, True)
+
+
+@pytest.mark.parametrize(
+    "input,expected_post_ids",
+    [
+        ("category:cat1", [1, 2, 3]),
+        ("category:cat2", [3, 4]),
+    ],
+)
+def test_search_by_tag_category(
+    verify_unpaged,
+    post_factory,
+    tag_factory,
+    tag_category_factory,
+    input,
+    expected_post_ids,
+):
+    cat1 = tag_category_factory(name="cat1")
+    cat2 = tag_category_factory(name="cat2")
+    tag1 = tag_factory(names=["t1"], category=cat1)
+    tag2 = tag_factory(names=["t2"], category=cat1)
+    tag3 = tag_factory(names=["t3"], category=cat2)
+
+    post1 = post_factory(id=1)
+    post1.tags.append(tag1)
+
+    post2 = post_factory(id=2)
+    post2.tags.append(tag2)
+
+    post3 = post_factory(id=3)
+    post3.tags.append(tag1)
+    post3.tags.append(tag3)
+
+    post4 = post_factory(id=4)
+    post4.tags.append(tag3)
+
+    post5 = post_factory(id=5)
+
+    db.session.add_all(
+        [
+            tag1,
+            tag2,
+            tag3,
+            post1,
+            post2,
+            post3,
+            post4,
+            post5,
+        ]
+    )
+    db.session.flush()
+    verify_unpaged(input, expected_post_ids)

@@ -1,6 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
+const api = require("../api.js");
 const views = require("../util/views.js");
 const FileDropperControl = require("../controls/file_dropper_control.js");
 const TagList = require("../models/tag_list.js");
@@ -27,6 +28,7 @@ function _mimeTypeToPostType(mimeType) {
             "image/heic": "image",
             "video/mp4": "video",
             "video/webm": "video",
+            "video/quicktime": "video",
         }[mimeType] || "unknown"
     );
 }
@@ -40,7 +42,8 @@ class Uploadable extends events.EventTarget {
         this.flags = [];
         this.tags = [];
         this.relations = [];
-        this.anonymous = false;
+        this.anonymous = !api.isLoggedIn();
+        this.forceAnonymous = !api.isLoggedIn();
     }
 
     destroy() {}
@@ -124,6 +127,7 @@ class Url extends Uploadable {
             heif: "image/heif",
             heic: "image/heic",
             mp4: "video/mp4",
+            mov: "video/quicktime",
             webm: "video/webm",
         };
         for (let extension of Object.keys(mime)) {
@@ -309,7 +313,7 @@ class PostUploadView extends events.EventTarget {
         for (let uploadable of this._uploadables) {
             this._updateUploadableFromDom(uploadable);
         }
-        this._submitButtonNode.value = "Resume upload";
+        this._submitButtonNode.value = "Resume";
         this._emit("submit");
     }
 
@@ -396,6 +400,10 @@ class PostUploadView extends events.EventTarget {
                     skipDuplicates: this._skipDuplicatesCheckboxNode.checked,
                     copyTagsToOriginals:
                         this._copyTagsToOriginalsCheckboxNode.checked,
+                    alwaysUploadSimilar:
+                        this._alwaysUploadSimilarCheckboxNode.checked,
+                    pauseRemainOnError:
+                        this._pauseRemainOnErrorCheckboxNode.checked,
                 },
             })
         );
@@ -465,6 +473,18 @@ class PostUploadView extends events.EventTarget {
 
     get _copyTagsToOriginalsCheckboxNode() {
         return this._hostNode.querySelector("form [name=copy-tags-to-originals]");
+    }
+    
+    get _alwaysUploadSimilarCheckboxNode() {
+        return this._hostNode.querySelector(
+            "form [name=always-upload-similar]"
+        );
+    }
+
+    get _pauseRemainOnErrorCheckboxNode() {
+        return this._hostNode.querySelector(
+            "form [name=pause-remain-on-error]"
+        );
     }
 
     get _submitButtonNode() {

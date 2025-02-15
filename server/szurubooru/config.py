@@ -21,7 +21,7 @@ def _merge(left: Dict, right: Dict) -> Dict:
     return left
 
 
-def _docker_config() -> Dict:
+def _container_config() -> Dict:
     if "TEST_ENVIRONMENT" not in os.environ:
         for key in ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST"]:
             if key not in os.environ:
@@ -33,7 +33,7 @@ def _docker_config() -> Dict:
         "show_sql": int(os.getenv("LOG_SQL", 0)),
         "data_url": os.getenv("DATA_URL", "data/"),
         "data_dir": "/data/",
-        "database": "postgres://%(user)s:%(pass)s@%(host)s:%(port)d/%(db)s"
+        "database": "postgresql://%(user)s:%(pass)s@%(host)s:%(port)d/%(db)s"
         % {
             "user": os.getenv("POSTGRES_USER"),
             "pass": os.getenv("POSTGRES_PASSWORD"),
@@ -49,6 +49,15 @@ def _file_config(filename: str) -> Dict:
         return yaml.load(handle.read(), Loader=yaml.SafeLoader) or {}
 
 
+def _running_inside_container() -> bool:
+    env = os.environ.keys()
+    return (
+        os.path.exists("/.dockerenv")
+        or "KUBERNETES_SERVICE_HOST" in env
+        or "container" in env  # set by lxc/podman
+    )
+
+
 def _read_config() -> Dict:
     ret = _file_config("config.yaml.dist")
     if os.path.isfile("config.yaml"):
@@ -57,8 +66,8 @@ def _read_config() -> Dict:
         logger.warning(
             "'config.yaml' should be a file, not a directory, skipping"
         )
-    if os.path.exists("/.dockerenv"):
-        ret = _merge(ret, _docker_config())
+    if _running_inside_container():
+        ret = _merge(ret, _container_config())
     return ret
 
 

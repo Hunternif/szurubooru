@@ -6,6 +6,9 @@ import shlex
 import subprocess
 from io import BytesIO
 from typing import List
+
+import HeifImagePlugin
+import pillow_avif
 from PIL import Image as PILImage
 
 from szurubooru import errors
@@ -17,7 +20,7 @@ logger = logging.getLogger(__name__)
 def convert_heif_to_png(content: bytes) -> bytes:
     img = PILImage.open(BytesIO(content))
     img_byte_arr = BytesIO()
-    img.save(img_byte_arr, format='PNG')
+    img.save(img_byte_arr, format="PNG")
     return img_byte_arr.getvalue()
 
 
@@ -276,10 +279,10 @@ class Image:
             proc = subprocess.Popen(
                 cli,
                 stdout=subprocess.PIPE,
-                stdin=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
-            out, err = proc.communicate(input=self.content)
+            out, err = proc.communicate()
             if proc.returncode != 0:
                 logger.warning(
                     "Failed to execute ffmpeg command (cli=%r, err=%r)",

@@ -160,6 +160,34 @@ class BulkAddRelationEditor extends BulkEditor {
     }
 }
 
+class BulkDeleteEditor extends BulkEditor {
+    constructor(hostNode) {
+        super(hostNode);
+        this._hostNode.addEventListener("submit", (e) =>
+            this._evtFormSubmit(e)
+        );
+    }
+
+    _evtFormSubmit(e) {
+        e.preventDefault();
+        this.dispatchEvent(
+            new CustomEvent("deleteSelectedPosts", { detail: {} })
+        );
+    }
+
+    _evtOpenLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(true);
+        this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+    }
+
+    _evtCloseLinkClick(e) {
+        e.preventDefault();
+        this.toggleOpen(false);
+        this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+    }
+}
+
 class PostsHeaderView extends events.EventTarget {
     constructor(ctx) {
         super();
@@ -247,6 +275,13 @@ class PostsHeaderView extends events.EventTarget {
                 this._evtCloseMetricsBtnClick(e)
             );
         }
+        
+        if (this._bulkEditDeleteNode) {
+            this._bulkDeleteEditor = new BulkDeleteEditor(
+                this._bulkEditDeleteNode
+            );
+            this._bulkEditors.push(this._bulkDeleteEditor);
+        }
 
         for (let editor of this._bulkEditors) {
             editor.addEventListener("submit", (e) => {
@@ -268,6 +303,8 @@ class PostsHeaderView extends events.EventTarget {
             this._openBulkEditor(this._bulkSafetyEditor);
         } else if (ctx.parameters.relations && this._bulkAddRelationEditor) {
             this._openBulkEditor(this._bulkAddRelationEditor);
+        } else if (ctx.parameters.delete && this._bulkDeleteEditor) {
+            this._openBulkEditor(this._bulkDeleteEditor);
         }
         if (ctx.parameters.metrics && this._metricsBlockNode) {
             this._toggleMetricsBlock(true);
@@ -320,6 +357,10 @@ class PostsHeaderView extends events.EventTarget {
 
     get _bulkAddRelationNode() {
         return this._hostNode.querySelector(".bulk-add-relation");
+    }
+
+    get _bulkEditDeleteNode() {
+        return this._hostNode.querySelector(".bulk-edit-delete");
     }
 
     get _metricsButtonHolderNode() {
@@ -400,9 +441,8 @@ class PostsHeaderView extends events.EventTarget {
         e.target.classList.toggle("disabled");
         const safety = e.target.getAttribute("data-safety");
         let browsingSettings = settings.get();
-        browsingSettings.listPosts[safety] = !browsingSettings.listPosts[
-            safety
-        ];
+        browsingSettings.listPosts[safety] =
+            !browsingSettings.listPosts[safety];
         settings.save(browsingSettings, true);
         this.dispatchEvent(
             new CustomEvent("navigate", {
@@ -497,6 +537,10 @@ class PostsHeaderView extends events.EventTarget {
         parameters.relations =
             this._bulkAddRelationEditor && this._bulkAddRelationEditor.opened
                 ? this._ctx.parameters.relations || " "
+                : null;
+        parameters.delete =
+            this._bulkDeleteEditor && this._bulkDeleteEditor.opened
+                ? "1"
                 : null;
         this.dispatchEvent(
             new CustomEvent("navigate", { detail: { parameters: parameters } })

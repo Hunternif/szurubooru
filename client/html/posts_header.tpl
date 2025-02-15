@@ -76,6 +76,13 @@
             %><a href class='mousetrap button append open'>Mass add relation</a><%
             %><a href class='mousetrap button append close'>Stop adding relation</a><%
         %></form><%
+        if (ctx.canBulkDelete) {
+            %><form class='horizontal bulk-edit bulk-edit-delete'><%
+                %><a href class='mousetrap button append open'>Mass delete</a><%
+                %><input class='mousetrap start' type='submit' value='Delete selected posts'/><%
+                %><a href class='mousetrap button append close'>Stop deleting</a><%
+            %></form><%
+        }
     %></div><%
     if (ctx.canViewMetrics) {
     %><div class='metrics-block hidden'></div><%

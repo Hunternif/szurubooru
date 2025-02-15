@@ -139,6 +139,29 @@
                     &[data-disabled]
                         background: rgba(200, 200, 200, 0.7)
 
+                .delete-flipper
+                    display: inline-block
+                    padding: 0.5em
+                    box-sizing: border-box
+                    border: 0
+                    &:after
+                        display: inline-block
+                        width: 1em
+                        height: 1em
+                        text-align: center
+                        line-height: 1em
+                        font-size: 2.2em
+                    &.delete
+                        background: rgba(255, 0, 0, 0.7)
+                        &:after
+                            color: white
+                            font-family: FontAwesome;
+                            content: "\f1f8"; // fa-trash
+                    &:not(.delete)
+                        background: rgba(200, 200, 200, 0.7)
+                        &:after
+                            color: white
+                            content: '-'
 
             .thumbnail
                 width: 100%
@@ -189,6 +212,9 @@
             vertical-align: top
         @media (max-width: 1000px)
             display: block
+            &.bulk-edit-tags:not(.opened), &.bulk-edit-safety:not(.opened)
+                float: left
+                margin-right: 1em
     input
         margin-bottom: 0.25em
         margin-right: 0.25em
@@ -286,6 +312,21 @@
             .hint
                 margin-right: 1em
 
+            @media (max-width: 1000px)
+                margin-left: 0
+    .bulk-edit-delete
+        &.opened
+            .start
+                @media (max-width: 1000px)
+                    margin-left: 0
+        &:not(.opened)
+            .start
+                display: none
+        .append.open
+            @media (max-width: 1000px)
+                margin-left: 0
+        .start
+            margin-left: 1em
     .safety
         margin-right: 0.25em
         &.safety-safe

@@ -1,9 +1,7 @@
 ## Example Docker Compose configuration
 ##
-## Use this as a template to set up docker-compose, or as guide to set up other
+## Use this as a template to set up docker compose, or as guide to set up other
 ## orchestration services
-version: '2'
-
 services:
 
   server:
@@ -23,6 +21,7 @@ services:
       #POSTGRES_DB: defaults to same as POSTGRES_USER
       #POSTGRES_PORT: 5432
       #LOG_SQL: 0 (1 for verbose SQL logs)
+      THREADS:
     volumes:
       - "${MOUNT_DATA}:/data"
       - "./server/config.yaml:/opt/app/config.yaml"

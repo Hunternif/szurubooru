@@ -47,6 +47,7 @@ class PostListController {
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),
+            canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
@@ -55,6 +56,16 @@ class PostListController {
             this._evtNavigate(e)
         );
 
+        if (this._headerView._bulkDeleteEditor) {
+            this._headerView._bulkDeleteEditor.addEventListener(
+                "deleteSelectedPosts",
+                (e) => {
+                    this._evtDeleteSelectedPosts(e);
+                }
+            );
+        }
+
+        this._postsMarkedForDeletion = [];
         this._syncPageController();
     }
 
@@ -143,6 +154,38 @@ class PostListController {
         this._ctx.parameters.relations = relations.join(" ") || " ";
     }
 
+    _evtMarkForDeletion(e) {
+        const postId = e.detail;
+
+        // Add or remove post from delete list
+        if (e.detail.delete) {
+            this._postsMarkedForDeletion.push(e.detail.post);
+        } else {
+            this._postsMarkedForDeletion = this._postsMarkedForDeletion.filter(
+                (x) => x.id != e.detail.post.id
+            );
+        }
+    }
+
+    _evtDeleteSelectedPosts(e) {
+        if (this._postsMarkedForDeletion.length == 0) return;
+
+        if (
+            confirm(
+                `Are you sure you want to delete ${this._postsMarkedForDeletion.length} posts?`
+            )
+        ) {
+            Promise.all(
+                this._postsMarkedForDeletion.map((post) => post.delete())
+            )
+                .catch((error) => window.alert(error.message))
+                .then(() => {
+                    this._postsMarkedForDeletion = [];
+                    this._headerView._navigate();
+                });
+        }
+    }
+
     _syncPageController() {
         this._pageController.run({
             parameters: this._ctx.parameters,
@@ -177,6 +220,11 @@ class PostListController {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
                     },
+                    canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
+                    bulkEdit: {
+                        tags: this._bulkEditTags,
+                        markedForDeletion: this._postsMarkedForDeletion,
+                    },
                     postFlow: settings.get().postFlow,
                 });
                 const view = new PostsPageView(pageCtx);
@@ -190,6 +238,9 @@ class PostListController {
                 );
                 view.addEventListener("removeRelation", (e) =>
                     this._evtRemoveRelation(e)
+                );
+                view.addEventListener("markForDeletion", (e) =>
+                    this._evtMarkForDeletion(e)
                 );
                 return view;
             },
