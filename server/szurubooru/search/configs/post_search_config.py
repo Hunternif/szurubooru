@@ -256,6 +256,15 @@ def _safety_filter(
     )(query, criterion, negated)
 
 
+def _apply_safety_filter(
+    query: SaQuery, safety: str, negated: bool
+) -> SaQuery:
+    expr = model.Post.safety == safety
+    if negated:
+        expr = ~expr
+    return query.filter(expr)
+
+
 class PostSearchConfig(BaseSearchConfig):
     def __init__(self) -> None:
         self.user = None  # type: Optional[model.User]
@@ -320,17 +329,16 @@ class PostSearchConfig(BaseSearchConfig):
         return db.session.query(model.Post)
 
     def finalize_query(self, query: SaQuery) -> SaQuery:
-        if self.user and not auth.has_privilege(
-            self.user, "posts:list:unsafe"
-        ):
-            # exclude unsafe posts:
-            query = _safety_filter(
-                query,
-                criteria.PlainCriterion(
-                    model.Post.SAFETY_UNSAFE, model.Post.SAFETY_UNSAFE
-                ),
-                negated=True,
-            )
+        # exclude posts according to user's privileges:
+        if self.user:
+            if not auth.has_privilege(self.user, "posts:list:sketchy"):
+                query = _apply_safety_filter(
+                    query, model.Post.SAFETY_SKETCHY, negated=True
+                )
+            if not auth.has_privilege(self.user, "posts:list:unsafe"):
+                query = _apply_safety_filter(
+                    query, model.Post.SAFETY_UNSAFE, negated=True
+                )
         return query.order_by(model.Post.post_id.desc())
 
     @property

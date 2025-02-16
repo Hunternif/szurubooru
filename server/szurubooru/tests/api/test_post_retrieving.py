@@ -16,7 +16,9 @@ def inject_config(config_injector):
             "privileges": {
                 "posts:list": model.User.RANK_REGULAR,
                 "posts:view": model.User.RANK_REGULAR,
+                "posts:view:sketchy": model.User.RANK_REGULAR,
                 "posts:view:unsafe": model.User.RANK_REGULAR,
+                "posts:list:sketchy": model.User.RANK_REGULAR,
                 "posts:list:unsafe": model.User.RANK_REGULAR,
             },
         }
@@ -188,6 +190,7 @@ def test_trying_to_retrieve_unsafe_without_privileges(
         {
             "privileges": {
                 "posts:view": "anonymous",
+                "posts:view:sketchy": "regular",
                 "posts:view:unsafe": "regular",
             },
         }

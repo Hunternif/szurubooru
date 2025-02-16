@@ -64,6 +64,7 @@ def auth_executor(executor, user_factory, config_injector):
     config_injector(
         {
             "privileges": {
+                "posts:list:sketchy": model.User.RANK_REGULAR,
                 "posts:list:unsafe": model.User.RANK_REGULAR,
             }
         }
