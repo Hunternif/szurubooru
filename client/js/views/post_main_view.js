@@ -1,6 +1,5 @@
 "use strict";
 
-const iosCorrectedInnerHeight = require("ios-inner-height");
 const router = require("../router.js");
 const views = require("../util/views.js");
 const uri = require("../util/uri.js");
@@ -21,21 +20,24 @@ class PostMainView {
 
         const sourceNode = template(ctx);
         const postContainerNode = sourceNode.querySelector(".post-container");
-        const sidebarNode = sourceNode.querySelector(".sidebar");
         views.replaceContent(this._hostNode, sourceNode);
         views.syncScrollPosition();
-
-        const topNavigationNode =
-            document.body.querySelector("#top-navigation");
 
         this._postContentControl = new PostContentControl(
             postContainerNode,
             ctx.post,
             () => {
+                // Need add extra margin at the bottom for symmetry:
+                const postContainerRect =
+                    postContainerNode.getBoundingClientRect();
+                const margin =
+                    postContainerRect.top -
+                    this._hostNode.getBoundingClientRect().top;
                 return [
-                    postContainerNode.getBoundingClientRect().width,
-                    iosCorrectedInnerHeight() -
-                        postContainerNode.getBoundingClientRect().top,
+                    postContainerRect.width,
+                    window.visualViewport.height -
+                        postContainerRect.top -
+                        margin,
                 ];
             }
         );
@@ -164,7 +166,7 @@ class PostMainView {
         }
         commentForm.hidden = true; // collapse by default
         addCommentButton.addEventListener("click", () => {
-            commentForm.hidden = !commentForm.hidden
+            commentForm.hidden = !commentForm.hidden;
         });
     }
 
