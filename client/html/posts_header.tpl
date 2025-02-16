@@ -30,19 +30,21 @@
                 } else { %>Syntax help<% }
         %></a><%
         %><wbr/><%
-        %><span class="bulk-edit-btn-holder"><%
-            %><a href class='mousetrap button append open bulk-edit-btn'><%
-                if (window.innerWidth <= 500) { %>Mass<%
-                } else { %>Mass edit<% }
-                %><i class='fa fa-chevron-down icon-inline'></i><%
-            %></a><%
-            %><a href class='mousetrap button append close bulk-edit-btn'><%
-                if (window.innerWidth <= 500) { %>Mass<%
-                } else { %>Mass edit<% }
-                %><i class='fa fa-chevron-up icon-inline'></i><%
-            %></a><%
-        %></span><%
-        %><wbr/><%
+        if (ctx.canBulkEdit) {
+            %><span class="bulk-edit-btn-holder"><%
+                %><a href class='mousetrap button append open bulk-edit-btn'><%
+                    if (window.innerWidth <= 500) { %>Mass<%
+                    } else { %>Mass edit<% }
+                    %><i class='fa fa-chevron-down icon-inline'></i><%
+                %></a><%
+                %><a href class='mousetrap button append close bulk-edit-btn'><%
+                    if (window.innerWidth <= 500) { %>Mass<%
+                    } else { %>Mass edit<% }
+                    %><i class='fa fa-chevron-up icon-inline'></i><%
+                %></a><%
+            %></span><%
+            %><wbr/><%
+        }
         if (ctx.canViewMetrics) {
             %><span class="metrics-btn-holder"><%
                 %><a href class='mousetrap button append open metrics-btn'><%

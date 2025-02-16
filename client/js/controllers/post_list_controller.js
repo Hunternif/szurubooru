@@ -39,6 +39,18 @@ class PostListController {
         topNavigation.activate("posts");
         topNavigation.setTitle("Listing posts");
 
+        const canBulkEditTags = api.hasPrivilege("posts:bulk-edit:tags");
+        const canBulkEditSafety = api.hasPrivilege("posts:bulk-edit:safety");
+        const canBulkEditRelations = api.hasPrivilege(
+            "posts:bulk-edit:relations"
+        );
+        const canBulkDelete = api.hasPrivilege("posts:bulk-edit:delete");
+        const canBulkEdit =
+            canBulkEditTags ||
+            canBulkEditSafety ||
+            canBulkEditRelations ||
+            canBulkDelete;
+
         this._headerView = new PostsHeaderView({
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
@@ -46,11 +58,12 @@ class PostListController {
             enableSafety: api.safetyEnabled(),
             canListSketchy: api.hasPrivilege("posts:list:sketchy"),
             canListUnsafe: api.hasPrivilege("posts:list:unsafe"),
-            canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
-            canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),
-            canBulkEditRelations: api.hasPrivilege("posts:bulk-edit:relations"),
-            canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
+            canBulkEdit,
+            canBulkEditTags,
+            canBulkEditSafety,
+            canBulkEditRelations,
+            canBulkDelete,
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
@@ -85,8 +98,10 @@ class PostListController {
     }
 
     get _bulkEditRelationsIds() {
-        return (this._ctx.parameters.relations || "").split(/\s+/).filter(s => s)
-            .map(id => parseInt(id));
+        return (this._ctx.parameters.relations || "")
+            .split(/\s+/)
+            .filter((s) => s)
+            .map((id) => parseInt(id));
     }
 
     _evtNavigate(e) {
@@ -95,7 +110,8 @@ class PostListController {
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._bulkEditTags.map((tagName) =>
-            tags.resolveTagAndCategory(tagName)
+            tags
+                .resolveTagAndCategory(tagName)
                 .catch((error) => window.alert(error.message))
         );
         this._syncPageController();
@@ -138,14 +154,14 @@ class PostListController {
         addedPost.save().catch((error) => window.alert(error.message));
         relations.push(addedPost.id);
         this._updateRelationsForBulkEdit(relations);
-
     }
 
     _evtRemoveRelation(e) {
         let removedPost = e.detail.post;
         let relations = this._bulkEditRelationsIds;
-        removedPost.relations = removedPost.relations
-            .filter((id)=> !relations.some((relationId) => relationId == id));
+        removedPost.relations = removedPost.relations.filter(
+            (id) => !relations.some((relationId) => relationId == id)
+        );
         // Only save the updated post, the relationship will propagate to others automatically
         removedPost.save().catch((error) => window.alert(error.message));
         relations = relations.filter((id) => id != removedPost.id);
@@ -223,7 +239,9 @@ class PostListController {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
                     },
-                    canBulkEditRelations: api.hasPrivilege("posts:bulk-edit:relations"),
+                    canBulkEditRelations: api.hasPrivilege(
+                        "posts:bulk-edit:relations"
+                    ),
                     canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
                     bulkEdit: {
                         tags: this._bulkEditTags,

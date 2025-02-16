@@ -256,15 +256,22 @@ class PostsHeaderView extends events.EventTarget {
             this._bulkEditors.push(this._bulkAddRelationEditor);
         }
 
-        this._bulkEditOpenButtonNode.addEventListener("click", (e) =>
-            this._evtOpenBulkEditBtnClick(e)
-        );
-        this._bulkEditCloseButtonNode.addEventListener("click", (e) =>
-            this._evtCloseBulkEditBtnClick(e)
-        );
+        if (this._bulkEditOpenButtonNode) {
+            this._bulkEditOpenButtonNode.addEventListener("click", (e) =>
+                this._evtOpenBulkEditBtnClick(e)
+            );
+        }
+        if (this._bulkEditCloseButtonNode) {
+            this._bulkEditCloseButtonNode.addEventListener("click", (e) =>
+                this._evtCloseBulkEditBtnClick(e)
+            );
+        }
 
         if (this._metricsButtonHolderNode) {
-            this._metricControl = new MetricHeaderControl(this._metricsBlockNode, ctx);
+            this._metricControl = new MetricHeaderControl(
+                this._metricsBlockNode,
+                ctx
+            );
             this._metricControl.addEventListener("submit", (e) =>
                 this._navigate()
             );
@@ -275,7 +282,7 @@ class PostsHeaderView extends events.EventTarget {
                 this._evtCloseMetricsBtnClick(e)
             );
         }
-        
+
         if (this._bulkEditDeleteNode) {
             this._bulkDeleteEditor = new BulkDeleteEditor(
                 this._bulkEditDeleteNode
@@ -515,7 +522,7 @@ class PostsHeaderView extends events.EventTarget {
         let parameters = {
             query: this._queryInputNode.value,
             cachenumber: this._ctx.parameters.cachenumber,
-            metrics: this._ctx.parameters.metrics
+            metrics: this._ctx.parameters.metrics,
         };
 
         // convert falsy values to an empty string "" so that we can correctly compare with the current query
