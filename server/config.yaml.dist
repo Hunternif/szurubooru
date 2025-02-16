@@ -102,6 +102,7 @@ privileges:
     'posts:reverse_search':         regular
     'posts:view':                   anonymous
     'posts:view:featured':          anonymous
+    'posts:view:similar':           regular
     'posts:view:sketchy':           regular
     'posts:view:unsafe':            regular
     'posts:edit:content':           power
@@ -119,7 +120,7 @@ privileges:
     'posts:favorite':               regular
     'posts:bulk-edit:tags':         power
     'posts:bulk-edit:safety':       power
-    'posts:view:similar':           regular
+    'posts:bulk-edit:relations':    power
     'posts:bulk-edit:delete':       power
 
     'tags:create':                  regular

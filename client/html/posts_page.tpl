@@ -42,7 +42,7 @@
                             <a href class='tag-flipper'>
                             </a>
                         <% } %>
-                        <% if (ctx.parameters && ctx.parameters.relations) { %>
+                        <% if (ctx.canBulkEditRelations && ctx.parameters && ctx.parameters.relations) { %>
                             <a href class='relation-flipper'>
                             </a>
                         <% } %>

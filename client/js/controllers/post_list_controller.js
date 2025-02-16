@@ -49,6 +49,7 @@ class PostListController {
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),
+            canBulkEditRelations: api.hasPrivilege("posts:bulk-edit:relations"),
             canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
             bulkEdit: {
                 tags: this._bulkEditTags,
@@ -222,6 +223,7 @@ class PostListController {
                         tags: this._bulkEditTags,
                         relations: this._ctx.parameters.relations,
                     },
+                    canBulkEditRelations: api.hasPrivilege("posts:bulk-edit:relations"),
                     canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
                     bulkEdit: {
                         tags: this._bulkEditTags,
