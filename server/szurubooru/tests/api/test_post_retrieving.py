@@ -17,6 +17,7 @@ def inject_config(config_injector):
                 "posts:list": model.User.RANK_REGULAR,
                 "posts:view": model.User.RANK_REGULAR,
                 "posts:view:unsafe": model.User.RANK_REGULAR,
+                "posts:list:unsafe": model.User.RANK_REGULAR,
             },
         }
     )
