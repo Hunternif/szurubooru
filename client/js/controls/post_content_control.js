@@ -107,7 +107,7 @@ class PostContentControl {
     _resizePostContent(width, height) {
         // on mobile don't make the content node narrower than the screen, so that small images are centered
         // use browser width to accommodate Android's on-screen buttons in landscape mode
-        if (window.innerWidth < 1000) {
+        if (window.innerWidth <= 800) {
             width = Math.max(window.innerWidth, width);
         }
         this._postContentNode.style.width = width + "px";
@@ -121,7 +121,7 @@ class PostContentControl {
     _install() {
         this._reinstall();
         // Don't auto-resize on mobile, to prevent size jerk when scrolling
-        if (window.innerWidth > 1000) {
+        if (window.innerWidth > 800) {
             optimizedResize.add(() => this._refreshSize());
         }
         views.monitorNodeRemoval(this._hostNode, () => {

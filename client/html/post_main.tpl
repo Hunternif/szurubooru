@@ -70,7 +70,7 @@
 
         <div class='sidebar-container'></div>
 
-        <% if (window.innerWidth <= 1000) { %>
+        <% if (window.innerWidth <= 800) { %>
             <div class='comments-panel'>
                 <% if (ctx.canListComments) { %>
                     <div class='comments-container'></div>
@@ -86,7 +86,7 @@
     <div class='content'>
         <div class='post-container'></div>
 
-        <% if (window.innerWidth > 1000) { %>
+        <% if (window.innerWidth > 800) { %>
             <% if (ctx.canListComments) { %>
                 <div class='comments-container'></div>
             <% } %>
