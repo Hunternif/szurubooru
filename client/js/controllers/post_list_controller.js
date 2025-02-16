@@ -44,6 +44,8 @@ class PostListController {
             parameters: ctx.parameters,
             isLoggedIn: api.isLoggedIn(),
             enableSafety: api.safetyEnabled(),
+            canListSketchy: api.hasPrivilege("posts:list:sketchy"),
+            canListUnsafe: api.hasPrivilege("posts:list:unsafe"),
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canViewMetrics: api.hasPrivilege("metrics:list"),

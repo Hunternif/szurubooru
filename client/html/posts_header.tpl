@@ -6,10 +6,12 @@
         %><button id='randomize-button' class='icon-button'><%
             %><i class="fa fa-random"><%
         %></button><%
-        %><% if (ctx.enableSafety) { %><%
+        %><% if (ctx.enableSafety && (ctx.canListSketchy || ctx.canListUnsafe)) { %><%
             %><input data-safety=safe type='button' class='mousetrap safety safety-safe <%- ctx.settings.listPosts.safe ? '' : 'disabled' %>'/><%
             %><input data-safety=sketchy type='button' class='mousetrap safety safety-sketchy <%- ctx.settings.listPosts.sketchy ? '' : 'disabled' %>'/><%
-            %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
+            if (ctx.canListUnsafe) {
+                %><input data-safety=unsafe type='button' class='mousetrap safety safety-unsafe <%- ctx.settings.listPosts.unsafe ? '' : 'disabled' %>'/><%
+            }
         %><% } %><%
         %><% if (ctx.isLoggedIn) { %><%
             %><a href class='mousetrap icon-button query-shortcut' data-term='special:liked'><%
