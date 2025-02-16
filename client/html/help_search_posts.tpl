@@ -15,6 +15,10 @@
             <td>having given tag (accepts wildcards)</td>
         </tr>
         <tr>
+            <td><code>category</code></td>
+            <td>having any tag in this category</td>
+        </tr>
+        <tr>
             <td><code>score</code></td>
             <td>having given score</td>
         </tr>
