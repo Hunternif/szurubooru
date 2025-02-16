@@ -16,6 +16,7 @@ def inject_config(config_injector):
             "privileges": {
                 "posts:list": model.User.RANK_REGULAR,
                 "posts:view": model.User.RANK_REGULAR,
+                "posts:view:unsafe": model.User.RANK_REGULAR,
             },
         }
     )
@@ -75,7 +76,10 @@ def test_trying_to_use_special_tokens_without_logging_in(
 ):
     config_injector(
         {
-            "privileges": {"posts:list": "anonymous"},
+            "privileges": {
+                "posts:list": "anonymous",
+                "posts:list:unsafe": "regular",
+            },
         }
     )
     with pytest.raises(errors.SearchError):
@@ -129,24 +133,28 @@ def test_trying_to_retrieve_single_without_privileges(
         )
 
 
-@pytest.mark.parametrize("query,expected_id", [
-    ("sort:id,asc", 2),
-    ("sort:id,asc id:2..", 2),
-    ("sort:id,desc id:2..", 3),
-    ("sort:id,asc id:3..", 3),
-    ("sort:id,desc id:3..", 3),
-    ("sort:id id:4..", None),
-    ("sort:tag-count", 3),
-    ("sort:tag-count,asc id:..2", 1),
-    ("sort:tag-count,desc id:..2", 2),
-])
+@pytest.mark.parametrize(
+    "query,expected_id",
+    [
+        ("sort:id,asc", 2),
+        ("sort:id,asc id:2..", 2),
+        ("sort:id,desc id:2..", 3),
+        ("sort:id,asc id:3..", 3),
+        ("sort:id,desc id:3..", 3),
+        ("sort:id id:4..", None),
+        ("sort:tag-count", 3),
+        ("sort:tag-count,asc id:..2", 1),
+        ("sort:tag-count,desc id:..2", 2),
+    ],
+)
 def test_median(
-        query,
-        expected_id,
-        post_factory,
-        tag_factory,
-        context_factory,
-        user_factory):
+    query,
+    expected_id,
+    post_factory,
+    tag_factory,
+    context_factory,
+    user_factory,
+):
     tag1 = tag_factory()
     tag2 = tag_factory()
     tag3 = tag_factory()
@@ -155,16 +163,38 @@ def test_median(
     post3 = post_factory(id=3, tags=[tag1, tag2])
     db.session.add_all([tag1, tag2, tag3, post1, post2, post3])
     db.session.flush()
-    with patch("szurubooru.func.comments.serialize_comment"), \
-             patch("szurubooru.func.users.serialize_micro_user"), \
-             patch("szurubooru.func.posts.files.has"):
+    with patch("szurubooru.func.comments.serialize_comment"), patch(
+        "szurubooru.func.users.serialize_micro_user"
+    ), patch("szurubooru.func.posts.files.has"):
         response = api.post_api.get_posts_median(
             context_factory(
                 params={"query": query},
-                user=user_factory(rank=model.User.RANK_REGULAR)))
+                user=user_factory(rank=model.User.RANK_REGULAR),
+            )
+        )
     if not expected_id:
         assert response["total"] == 0
         assert len(response["results"]) == 0
     else:
         assert response["total"] == 1
         assert response["results"][0]["id"] == expected_id
+
+
+def test_trying_to_retrieve_unsafe_without_privileges(
+    user_factory, context_factory, post_factory, config_injector
+):
+    config_injector(
+        {
+            "privileges": {
+                "posts:view": "anonymous",
+                "posts:view:unsafe": "regular",
+            },
+        }
+    )
+    db.session.add(post_factory(id=1, safety=model.Post.SAFETY_UNSAFE))
+    db.session.flush()
+    with pytest.raises(errors.AuthError):
+        api.post_api.get_post(
+            context_factory(user=user_factory(rank=model.User.RANK_ANONYMOUS)),
+            {"post_id": 1},
+        )
