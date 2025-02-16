@@ -11,7 +11,7 @@ const defaultSettings = {
     },
     uploadSafety: "safe",
     upscaleSmallPosts: false,
-    endlessScroll: false,
+    endlessScroll: true,
     keyboardShortcuts: true,
     transparencyGrid: false,
     fitMode: "fit-both",
